@@ -20,7 +20,11 @@
     {% block head %}{% endblock %}
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100"
+      {% if request.session.get('usuario_logado') %}
+          data-usuario-id="{{ request.session.get('usuario_logado')['id'] | e }}"
+      {% endif %}>
+
     <!-- Navbar Privada (Área Autenticada) -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
@@ -39,42 +43,58 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if request.path == '/usuario' else '' }}"
-                            href="/usuario">Dashboard</a>
+                            href="/usuario"><i class="bi bi-house-door"></i> Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/usuario/perfil/' in request.path else '' }}"
-                            href="/usuario/perfil/visualizar">Perfil</a>
+                            href="/usuario/perfil/visualizar"><i class="bi bi-person"></i> Perfil</a>
                     </li>
                     {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/chamados/' in request.path else '' }}"
-                            href="/admin/chamados/listar">Chamados</a>
+                            href="/admin/chamados/listar"><i class="bi bi-headset"></i> Chamados</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/usuarios/' in request.path else '' }}"
-                            href="/admin/usuarios/listar">Usuários</a>
+                            href="/admin/usuarios/listar"><i class="bi bi-people"></i> Usuários</a>
+                    </li>
+                    <!-- Link para Categorias (apenas admin) -->
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/categorias/' in request.path else '' }}"
+                            href="/admin/categorias/listar"><i class="bi bi-folder"></i> Categorias</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/configuracoes' in request.path else '' }}"
-                            href="/admin/configuracoes">Configurações</a>
+                            href="/admin/configuracoes"><i class="bi bi-gear"></i> Configurações</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/tema' in request.path else '' }}"
-                            href="/admin/tema">Tema</a>
+                            href="/admin/tema"><i class="bi bi-palette"></i> Tema</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/auditoria' in request.path else '' }}"
-                            href="/admin/auditoria">Auditoria</a>
+                            href="/admin/auditoria"><i class="bi bi-journal-text"></i> Auditoria</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/backups/' in request.path else '' }}"
-                            href="/admin/backups/listar">Backup</a>
+                            href="/admin/backups/listar"><i class="bi bi-server"></i> Backup</a>
                     </li>
                     {% else %}
+                    <!-- Link para Meus Artigos (apenas autores) -->
+                    {% if request.session.get('usuario_logado')['perfil'] == 'Autor' %}
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/chamados/' in request.path else '' }}"
-                            href="/chamados/listar">Chamados</a>
+                        <a class="nav-link {{ 'active' if '/artigos/meus' in request.path or '/artigos/cadastrar' in request.path or '/artigos/editar' in request.path else '' }}"
+                            href="/artigos/meus"><i class="bi bi-file-earmark-text"></i> Meus Artigos</a>
                     </li>
+                    {% endif %}
+                    <li class="nav-item">
+                            <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
+                               href="/tarefas/listar">Tarefas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if '/chamados/' in request.path else '' }}"
+                               href="/chamados/listar">Chamados</a>
+                        </li>
                     {% endif %}
                 </ul>
 
@@ -145,13 +165,9 @@
 
     <!-- Chat Widget JS -->
     <script src="/static/js/widget-chat.js" defer></script>
-    <script>
-        // Guardar ID do usuário logado no body para o chat
-        {% if request.session.get('usuario_logado') %}
-        document.body.dataset.usuarioId = {{ request.session.get('usuario_logado')['id'] }};
-        {% endif %}
 
-        // Inicializar chat quando DOM estiver pronto
+    <!-- Script de inicialização -->
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof chatWidget !== 'undefined') {
                 chatWidget.init();

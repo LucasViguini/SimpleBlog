@@ -30,6 +30,9 @@ resend==2.16.0
 # Variáveis de ambiente
 python-dotenv==1.0.1
 
+# Timezone data (necessário no Windows)
+tzdata==2024.1
+
 # Testes
 pytest==7.4.0
 pytest-asyncio==0.21.0
